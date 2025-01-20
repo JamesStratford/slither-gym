@@ -1,19 +1,14 @@
 import asyncio
 import json
 import websockets
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, DDPG
 from slither_env import SlitherEnv, GameConnection
 
 async def handle_client(websocket, connection: GameConnection):
     print(f"Client connected from {websocket.remote_address}")
     try:
         while True:
-            try:
-                message = await asyncio.wait_for(websocket.recv(), timeout=15.0)
-            except asyncio.TimeoutError:
-                print("Connection timed out due to inactivity")
-                break
-
+            message = await websocket.recv()
             data = json.loads(message)
 
             if data["type"] == "update":
@@ -24,7 +19,7 @@ async def handle_client(websocket, connection: GameConnection):
                 if action is None:
                     action = [0.0, 0.0, 0.0]
 
-                accelerate = 1 if action[2] > 0.5 else 0
+                accelerate = 1 if action[2] > 0.9 else 0
 
                 action_message = {
                     "type": "update",

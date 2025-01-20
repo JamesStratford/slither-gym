@@ -1,20 +1,25 @@
 {
     "name": "slither-bot",
-    "image": "nvidia/cuda:11.8.0-base-ubuntu20.04",
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "."
+    },
     "runArgs": ["--gpus", "all"],
     "features": {
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "3.12"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "20"
-        }
+      "ghcr.io/devcontainers/features/python:1": {
+        "version": "3.12"
+      },
+      "ghcr.io/devcontainers/features/node:1": {
+        "version": "20"
+      }
     },
     "customizations": {
-        "vscode": {
-            "extensions": [
-                "charliermarsh.ruff"
-            ]
-        }
-    }
-}
+      "vscode": {
+        "extensions": [
+          "charliermarsh.ruff"
+        ]
+      }
+    },
+    "postCreateCommand": "pipx install poetry"
+  }
+  
