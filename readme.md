@@ -1,14 +1,18 @@
 # Slither Gym
 
-Slither Gym is a reinforcement learning environment and model server for training and deploying AI agents in a Slither-like game. The project uses the Stable Baselines3 library for training models and WebSockets for real-time communication between the game client and the server.
+Slither Gym is a reinforcement learning environment and model server for training and deploying AI agents in [slither.io](http://slither.io/). The project uses the Stable Baselines3 library for training models and WebSockets for real-time communication between the game client and the server.
+
+![Slither Gym](./slither-gym.png)
 
 ## Project Structure
 
 - `src/`: Contains the source code for the environment, model, and server.
-  - `model.py`: Defines the custom CNN model used for feature extraction.
-  - `slither_env.py`: Implements the Slither environment using Gymnasium.
-  - `model_server.py`: Handles WebSocket connections and model predictions.
+  - `__main__.py`: Main entry point for running a trained model on the server.
   - `train.py`: Script for training the model using PPO.
+  - `renderer.py`: Renders the game environment.
+  - `slither_env.py`: Implements the Slither environment using Gymnasium.
+  - `websocket_server.py`: Handles WebSocket connections and model predictions.
+  - `utils.py`: Utility functions for the project.
 
 - `client/`: Contains the client-side code for interacting with the server.
 
@@ -16,7 +20,7 @@ Slither Gym is a reinforcement learning environment and model server for trainin
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.12 or higher
 - Poetry for dependency management
 - Tampermonkey or Violentmonkey browser extension to inject the client script
 
@@ -51,7 +55,7 @@ To train the model, run the following command:
 python src/train.py
 ```
 
-This will train the model using the PPO algorithm and save it as `slither_model`.
+This will train the model using the PPO algorithm and save it as `output/slither_model.zip`.
 
 ### Client Interaction
 

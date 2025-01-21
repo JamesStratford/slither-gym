@@ -46,10 +46,10 @@ class ViTExtractor(BaseFeaturesExtractor):
         self,
         observation_space,
         features_dim=128,
-        patch_size=5,
+        patch_size=10, # 5
         embed_dim=64,
         num_heads=4,
-        num_layers=4,
+        num_layers=4, # 4 
         mlp_ratio=4.0,
         dropout=0.0,
         use_cls_token=True

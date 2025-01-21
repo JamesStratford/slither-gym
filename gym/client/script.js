@@ -16,7 +16,7 @@ let slither_acceleration = 0;
 
 // --- WebSocket Initialization ---
 (function () {
-    const socket = new WebSocket('ws://127.0.0.1:8881');
+    const socket = new WebSocket('ws://127.0.0.1:10043');
 
     // WebSocket Handlers
     socket.addEventListener('open', () => {
@@ -63,10 +63,11 @@ const calculateDistance = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x2 - x1, 2) + M
 const processTopBodyParts = (slithers, referenceX, referenceY, topN = 100) => {
     let allParts = [];
 
-    slithers.forEach((slither) => {
-        slither.pts.forEach((part) => {
+    slithers.forEach((o_slither) => {
+        if (o_slither.id === slither.id) return;
+        o_slither.gptz.forEach((part) => {
             const dist = calculateDistance(part.xx, part.yy, referenceX, referenceY);
-            allParts.push({ x: part.xx, y: part.yy, dist });
+            allParts.push({ x: part.xx, y: part.yy, dist, size: o_slither.size });
         });
     });
 
@@ -121,7 +122,7 @@ const processOtherSlithers = (slithers, currentSnakeId, referenceX, referenceY, 
             }
             const dist = calculateDistance(other_slither.xx, other_slither.yy, referenceX, referenceY);
             if (dist < maxDistance) {
-                parts = other_slither.pts.map((part) => ({
+                parts = other_slither.gptz.map((part) => ({
                     x: part.xx,
                     y: part.yy,
                     dist: calculateDistance(part.xx, part.yy, referenceX, referenceY)
@@ -141,6 +142,22 @@ const processOtherSlithers = (slithers, currentSnakeId, referenceX, referenceY, 
             return null;
         })
         .filter((slither) => slither !== null);
+};
+
+const processClosestEnemyByPartsToHead = (slithers, referenceX, referenceY, maxDistance = 2000) => {
+    return slithers.filter((slither) => slither.id !== slither.id)
+        .map((other_slither) => {
+            const parts = other_slither.parts.map((part) => {
+                if (part.dist > maxDistance) return null;
+                return {
+                    x: part.xx,
+                    y: part.yy,
+                    dist: calculateDistance(part.xx, part.yy, referenceX, referenceY)
+                };
+            });
+            parts.sort((a, b) => a.dist - b.dist);
+            return other_slither;
+        })
 };
 
 let connected = true;
@@ -179,10 +196,11 @@ const hk_redraw = () => {
     if (++frame % 10 === 0) {
         frame = 0;
 
-        parts = slither.pts.map((part) => ({
+        parts = slither.gptz.map((part) => ({
             x: part.xx,
             y: part.yy,
-            dist: calculateDistance(part.xx, part.yy, slither.xx, slither.yy)
+            dist: calculateDistance(part.xx, part.yy, slither.xx, slither.yy),
+            size: slither.size,
         }));
         var sct = slither.sct + slither.rsc;
         let score = Math.floor((fpsls[sct] + slither.fam / fmlts[sct] - 1) * 15 - 5) / 1;
@@ -199,15 +217,25 @@ const hk_redraw = () => {
         food_eaten = score - last_size;
         last_size = score;
 
-        const other_slithers = processOtherSlithers(slithers, slither.id, slither.xx, slither.yy);
+        const other_slithers = processOtherSlithers(slithers, slither.id, slither.xx, slither.yy, 2000);
         const food_locations = processFood(foods, slither.xx, slither.yy);
         const preys_locations = processPreys(preys, slither.xx, slither.yy);
 
         // Get top 100 closest body parts
-        const top_body_parts = processTopBodyParts(slithers, slither.xx, slither.yy, 100);
+        const top_body_parts = processTopBodyParts(slithers, slither.xx, slither.yy, 200);
+
+        const target_slither = processClosestEnemyByPartsToHead(slithers, slither.xx, slither.yy, 200);
+        const target_slither_details = {
+            x: target_slither.xx,
+            y: target_slither.yy,
+            parts: target_slither.gptz,
+            ang: target_slither.ang,
+            size: target_slither.size,
+        };
 
         const gameState = {
             slither: slither_details,
+            target_slither: target_slither_details,
             foods: food_locations,
             preys: preys_locations,
             others: other_slithers,

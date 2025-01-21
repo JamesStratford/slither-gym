@@ -1,10 +1,11 @@
-import asyncio
 import json
 import websockets
-from stable_baselines3 import PPO, DDPG
-from slither_env import SlitherEnv, GameConnection
+from typing import TYPE_CHECKING
+# if TYPE_CHECKING:
+from slither_env import GameConnection
+from websockets.asyncio.server import ServerConnection
 
-async def handle_client(websocket, connection: GameConnection):
+async def handle_client(websocket: ServerConnection, connection: GameConnection):
     print(f"Client connected from {websocket.remote_address}")
     try:
         while True:
@@ -32,13 +33,3 @@ async def handle_client(websocket, connection: GameConnection):
                 await websocket.send(json.dumps(action_message))
     except websockets.exceptions.ConnectionClosed:
         print("Client disconnected")
-
-
-def setup_environment(connection: GameConnection, train: bool = False, *, policy_kwargs=None):
-    env = SlitherEnv(connection=connection)
-    if train:
-        model = PPO("CnnPolicy", env, verbose=1, policy_kwargs=policy_kwargs)
-        return env, model
-    else:
-        env.model = PPO.load("slither_model", env=env, verbose=1, policy_kwargs=policy_kwargs)
-        return env 
