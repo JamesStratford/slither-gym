@@ -57,6 +57,8 @@ python src/train.py
 
 This will train the model using the PPO algorithm and save it as `output/slither_model.zip`.
 
+The current model used is a Vision Transformer (ViT) for feature extraction and the 'CnnPolicy' policy.
+
 ### Client Interaction
 
 The client can connect to the server using WebSockets to send game state updates and receive actions.
